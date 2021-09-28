@@ -1,4 +1,4 @@
-# eslint-plugin-vite-import-resolver
+# eslint-import-resolver-vite
 
 Vite module resolution plugin for `eslint-plugin-import`.
 
@@ -15,11 +15,9 @@ export default = {
 
 // eslint config file
 
-const viteImportResolver = require("eslint-plugin-vite-import-resolver")
-
 module.exports = {
     settings: {
-        "import/resolver": viteImportResolver,
+        "import/resolver": "vite",
     },
 }
 

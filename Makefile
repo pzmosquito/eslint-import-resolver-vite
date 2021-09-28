@@ -1,4 +1,4 @@
-container := eslint-plugin-vite-import-resolver
+container := eslint-import-resolver-vite
 
 .PHONY: dev
 dev:
