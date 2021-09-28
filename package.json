@@ -1,0 +1,31 @@
+{
+  "name": "eslint-plugin-vite-import-resolver",
+  "version": "0.1.0",
+  "description": "Vite module resolution plugin for eslint-plugin-import.",
+  "keywords": [
+    "eslint",
+    "vite",
+    "import resolver"
+  ],
+  "engines": {
+    "node": ">=8",
+    "npm": ">=5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pzmosquito/eslint-plugin-vite-import-resolver"
+  },
+  "author": {
+    "name": "pzmosquito",
+    "email": "pzmosquito@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pzmosquito/eslint-plugin-vite-import-resolver/issues"
+  },
+  "homepage": "https://github.com/pzmosquito/eslint-plugin-vite-import-resolver#readme",
+  "main": "index.js",
+  "peerDependencies": {
+    "eslint-plugin-import": "^2"
+  }
+}
