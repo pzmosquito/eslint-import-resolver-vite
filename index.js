@@ -9,8 +9,27 @@ exports.resolve = (source, file, config) => {
     }
 
     // load vite config
-    const viteConfigPath = path.resolve("vite.config.js");
-    const { alias, extensions } = require(viteConfigPath).viteConfig.resolve;
+    const viteConfigPath = path.resolve(config.viteConfigPath ?? "vite.config.js");
+    const viteConfigFile = require(viteConfigPath);
+    let viteConfig;
+    if (typeof viteConfigFile.default === "function") {
+        const viteConfigFn = viteConfigFile.default();
+        if (viteConfigFn instanceof Promise) {
+            // async vite config must use a named export
+            viteConfig = viteConfigFile[config.namedExport ?? "viteConfig"];
+        }
+        else {
+            // use default export
+            viteConfig = viteConfigFn;
+        }
+    }
+    else {
+        // use default export
+        viteConfig = viteConfigFile.default;
+    }
+
+
+    const { alias, extensions } = viteConfig.resolve;
     const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
 
     let actualSource = source;

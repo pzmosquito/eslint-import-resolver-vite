@@ -1,6 +1,6 @@
 {
   "name": "eslint-import-resolver-vite",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Vite module resolution plugin for eslint-plugin-import.",
   "keywords": [
     "eslint",
