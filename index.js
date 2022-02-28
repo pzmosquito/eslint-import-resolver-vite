@@ -8,12 +8,18 @@ exports.resolve = (source, file, config) => {
         return { found: true, path: null };
     }
 
+    // combine default config with user defined config
+    const pluginConfig = {
+        configPath: "vite.config.js",
+        ...(config ?? {}),
+    };
+
     // load vite config
-    const viteConfigPath = path.resolve(config?.viteConfigPath ?? "vite.config.js");
+    const viteConfigPath = path.resolve(pluginConfig.configPath);
     const viteConfigFile = require(viteConfigPath);
     let viteConfig;
-    if (config?.namedExport) {
-        viteConfig = viteConfigFile[config.namedExport]
+    if (pluginConfig.namedExport) {
+        viteConfig = viteConfigFile[pluginConfig.namedExport]
     }
     else {
         viteConfig = typeof viteConfigFile.default === "function" ? viteConfigFile.default() : viteConfigFile.default;
