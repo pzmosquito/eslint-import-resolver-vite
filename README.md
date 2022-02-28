@@ -44,7 +44,7 @@ module.exports = {
                 configPath: "./app1/vite.confg.dev.js"
             }
         }
-    },
+    }
 }
 
 ```
@@ -58,16 +58,29 @@ module.exports = {
 - **namedExport**: named export of vite config object.
   - Required: No
   - Type: string
-  - Default: "viteConfig"
-  - If you use **async** vite config, you need to export a named vite config object since `eslint-plugin-import` doesn't support async resolver. e.g.
+  - Default: [No Default]
+  - **If you use a function as vite config, you must export a named vite config object.**
   ```js
   /**
    * vite config file
    */
   export const viteConfig = {};
   
-  export default async () => {
-      // process await data
+  export default ({ command, mode }) => {
+      // conditional config
       return viteConfig;
+  }
+
+  /**
+   * eslintrc file
+   */
+  module.exports = {
+      settings: {
+          "import/resolver": {
+              vite: {
+                  namedExport: "viteConfig"
+              }
+          }
+      }
   }
   ```

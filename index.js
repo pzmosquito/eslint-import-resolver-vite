@@ -9,23 +9,14 @@ exports.resolve = (source, file, config) => {
     }
 
     // load vite config
-    const viteConfigPath = path.resolve(config.viteConfigPath ?? "vite.config.js");
+    const viteConfigPath = path.resolve(config?.viteConfigPath ?? "vite.config.js");
     const viteConfigFile = require(viteConfigPath);
     let viteConfig;
-    if (typeof viteConfigFile.default === "function") {
-        const viteConfigFn = viteConfigFile.default();
-        if (viteConfigFn instanceof Promise) {
-            // async vite config must use a named export
-            viteConfig = viteConfigFile[config.namedExport ?? "viteConfig"];
-        }
-        else {
-            // use default export
-            viteConfig = viteConfigFn;
-        }
+    if (config?.namedExport) {
+        viteConfig = viteConfigFile[config.namedExport]
     }
     else {
-        // use default export
-        viteConfig = viteConfigFile.default;
+        viteConfig = typeof viteConfigFile.default === "function" ? viteConfigFile.default() : viteConfigFile.default;
     }
 
 
