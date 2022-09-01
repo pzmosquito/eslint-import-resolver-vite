@@ -59,7 +59,7 @@ module.exports = {
   - Required: No
   - Type: string
   - Default: [No Default]
-  - **If you use a function as vite config, you must export a named vite config object.**
+  - **If you use a function as vite config, you must export a named vite config object. This is a result of the limitation of `eslint-plugin-import`.**
   ```js
   /**
    * vite config file

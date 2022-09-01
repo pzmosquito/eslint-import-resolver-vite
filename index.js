@@ -1,7 +1,16 @@
 const path = require("path");
 const resolve = require("resolve");
+const fs = require("fs");
+const debug = require("debug");
 
-const log = require("debug")("eslint-plugin-import:resolver:vite");
+const namespace = "eslint-plugin-import:resolver:vite";
+
+const log = debug(namespace);
+
+const logError = (message) => {
+    log(message);
+    console.log(`[${namespace}] ${message}`);
+};
 
 exports.interfaceVersion = 2;
 
@@ -22,7 +31,11 @@ exports.resolve = (source, file, config) => {
 
         // load vite config
         const viteConfigPath = path.resolve(pluginConfig.configPath);
+        if (!fs.existsSync(viteConfigPath)) {
+            logError(`vite config file doesn't exist at '${viteConfigPath}'`);
+        }
         const viteConfigFile = require(viteConfigPath);
+
         let viteConfig;
         if (pluginConfig.namedExport) {
             viteConfig = viteConfigFile[pluginConfig.namedExport]
