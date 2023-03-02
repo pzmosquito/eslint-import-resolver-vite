@@ -41,7 +41,14 @@ module.exports = {
         // OR use custom config:
         "import/resolver": {
             vite: {
-                configPath: "./app1/vite.confg.dev.js"
+                configPath: "./app1/vite.config.dev.js"
+            }
+        }
+        
+        // If using TypeScript vite config file:
+        "import/resolver: {
+            vite: {
+                configPath: "vite.config.ts"
             }
         }
     }
