@@ -35,13 +35,13 @@ export default {
  */
 module.exports = {
     settings: {
-        // use default config:
+        // This uses the default `vite.config.js` file and the Vite configuration is an object. 
         "import/resolver": "vite",
         
-        // OR use custom config:
+        // OR use custom config (see Config Options below):
         "import/resolver": {
             vite: {
-                configPath: "./app1/vite.confg.dev.js"
+                configPath: "./app1/vite.confg.ts"
             }
         }
     }
