@@ -27,5 +27,11 @@
   "main": "index.js",
   "peerDependencies": {
     "eslint-plugin-import": "^2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
