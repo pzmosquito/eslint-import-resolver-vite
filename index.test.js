@@ -18,8 +18,8 @@ describe("Resolver Plugin Tests", () => {
         expect(result.path).toBe(null);
     });
 
-    test("should resolve non-core module", () => {
-        resolve.sync = jest.fn((source) => "/path/to/resolved.js");
+    test("should resolve non-core module with ESM vite config", () => {
+        resolve.sync = jest.fn(() => "/path/to/resolved.js");
 
         jest.mock("/path/to/vite.config.js", () => ({
             default: {
@@ -29,10 +29,34 @@ describe("Resolver Plugin Tests", () => {
                         "_": "/path/to/src",
                     },
                 },
-            }
+            },
         }), { virtual: true });
 
-        const result = resolver.resolve("_/module", "/path/to/file.js", { configPath: "/path/to/vite.config.js" });
+        // JS module
+        let result = resolver.resolve("_/module", "/path/to/file.js", { configPath: "/path/to/vite.config.js" });
+
+        expect(result.found).toBe(true);
+        expect(result.path).toBe("/path/to/resolved.js");
+        expect(resolve.sync).toHaveBeenCalledWith("/path/to/src/module", {
+            basedir: "/path/to",
+            extensions: [".js"],
+        });
+    });
+
+    test("should resolve non-core module with CJS vite config", () => {
+        resolve.sync = jest.fn(() => "/path/to/resolved.js");
+
+        jest.mock("/path/to/vite.config.js", () => ({
+            resolve: {
+                extensions: [".js"],
+                alias: {
+                    "_": "/path/to/src",
+                },
+            },
+        }), { virtual: true });
+
+        // JS module
+        let result = resolver.resolve("_/module", "/path/to/file.js", { configPath: "/path/to/vite.config.js" });
 
         expect(result.found).toBe(true);
         expect(result.path).toBe("/path/to/resolved.js");

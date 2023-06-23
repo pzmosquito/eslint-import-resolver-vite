@@ -41,7 +41,8 @@ exports.resolve = (source, file, config) => {
             viteConfig = viteConfigFile[pluginConfig.namedExport]
         }
         else {
-            viteConfig = typeof viteConfigFile.default === "function" ? viteConfigFile.default() : viteConfigFile.default;
+            const viteConfigObj = viteConfigFile.default ?? viteConfigFile
+            viteConfig = typeof viteConfigObj === "function" ? viteConfigObj() : viteConfigObj;
         }
 
         const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
