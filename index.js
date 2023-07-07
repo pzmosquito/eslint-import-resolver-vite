@@ -46,9 +46,15 @@ exports.resolve = (source, file, config) => {
         }
 
         const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
-        const { alias, extensions } = viteConfig.resolve ?? {};
+        const { alias, extensions = defaultExtensions } = viteConfig.resolve ?? {};
 
         let actualSource = source;
+
+        // public dir
+        const publicDir = viteConfig.publicDir || "public";
+        if (actualSource.charAt(0) === "/" && !fs.existsSync(actualSource)) {
+            actualSource = path.join(path.resolve(publicDir), actualSource);
+        }
 
         // parse and replace alias
         if (alias) {
@@ -59,9 +65,10 @@ exports.resolve = (source, file, config) => {
 
         // resolve module
         const resolvedPath = resolve.sync(actualSource, {
-            basedir: path.dirname(path.resolve(file)),
-            extensions: extensions ?? defaultExtensions,
+            basedir: path.dirname(file),
+            extensions,
         });
+
         log("resolved to:", resolvedPath);
         return { found: true, path: resolvedPath };
     }
