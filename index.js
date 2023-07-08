@@ -34,7 +34,7 @@ exports.resolve = (source, file, config) => {
         if (!fs.existsSync(viteConfigPath)) {
             logError(`vite config file doesn't exist at '${viteConfigPath}'`);
         }
-        const viteConfigFile = require(viteConfigPath);
+        const viteConfigFile = import(viteConfigPath);
 
         let viteConfig;
         if (pluginConfig.namedExport) {
