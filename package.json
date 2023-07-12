@@ -1,6 +1,6 @@
 {
   "name": "eslint-import-resolver-vite",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Vite module resolution plugin for eslint-plugin-import.",
   "keywords": [
     "eslint",
@@ -32,6 +32,6 @@
     "jest": "^29.5.0"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --watchAll"
   }
 }

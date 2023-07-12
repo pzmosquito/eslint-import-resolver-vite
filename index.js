@@ -9,7 +9,7 @@ const log = debug(namespace);
 
 const logError = (message) => {
     log(message);
-    console.log(`[${namespace}] ${message}`);
+    console.error(`[${namespace}] ${message}`);
 };
 
 exports.interfaceVersion = 2;
@@ -32,7 +32,7 @@ exports.resolve = (source, file, config) => {
         // load vite config
         const viteConfigPath = path.resolve(pluginConfig.configPath);
         if (!fs.existsSync(viteConfigPath)) {
-            logError(`vite config file doesn't exist at '${viteConfigPath}'`);
+            throw new Error(`Vite config file doesn't exist at '${viteConfigPath}'`)
         }
         const viteConfigFile = require(viteConfigPath);
 
@@ -50,17 +50,20 @@ exports.resolve = (source, file, config) => {
 
         let actualSource = source;
 
-        // public dir
-        const publicDir = viteConfig.publicDir || "public";
-        if (actualSource.charAt(0) === "/" && !fs.existsSync(actualSource)) {
-            actualSource = path.join(path.resolve(publicDir), actualSource);
-        }
-
         // parse and replace alias
         if (alias) {
             Object.entries(alias).forEach(([find, replacement]) => {
                 actualSource = actualSource.replace(find, replacement);
             });
+        }
+
+        // public dir
+        // TODO this can lead to incorrect path error if `actualSource` is absolute path and DNE.
+        if (viteConfig.publicDir !== false) {
+            const publicDir = viteConfig.publicDir ?? "public";
+            if (actualSource.charAt(0) === "/" && !fs.existsSync(actualSource)) {
+                actualSource = path.join(path.resolve(publicDir), actualSource);
+            }
         }
 
         // resolve module
@@ -73,7 +76,7 @@ exports.resolve = (source, file, config) => {
         return { found: true, path: resolvedPath };
     }
     catch (err) {
-        log("Path not found:", err);
+        logError(err.message);
         return { found: false };
     }
 };
