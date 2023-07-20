@@ -25,7 +25,59 @@ describe("Resolver Plugin Tests", () => {
                     extensions: [".js"],
                     alias: {
                         "_": "/path/to/src",
+                        "@": "assets/images",
                     },
+                },
+            },
+        }), { virtual: true });
+
+        // JS module
+        let result = resolver.resolve("_/@/_module@", "/path/to/file.js", { configPath: "/path/to/vite.config.js" });
+
+        expect(result.found).toBe(true);
+        expect(result.path).toBe("/path/to/resolved.js");
+        expect(resolve.sync).toHaveBeenCalledWith(
+            "/path/to/src/assets/images/_module@",
+            { basedir: "/path/to", extensions: [".js"] }
+        );
+    });
+
+    test("should resolve non-core module (array alias pairs)", () => {
+        resolve.sync = jest.fn(() => "/path/to/resolved.js");
+        fs.existsSync = jest.fn(() => true);
+
+        jest.mock("/path/to/vite.config.js", () => ({
+            default: {
+                resolve: {
+                    extensions: [".js"],
+                    alias: [
+                        { find: "_", replacement: "/path/to/src" },
+                        { find: "@", replacement: "assets/images" },
+                    ],
+                },
+            },
+        }), { virtual: true });
+
+        // JS module
+        let result = resolver.resolve("_/@/_module@", "/path/to/file.js", { configPath: "/path/to/vite.config.js" });
+
+        expect(result.found).toBe(true);
+        expect(result.path).toBe("/path/to/resolved.js");
+        expect(resolve.sync).toHaveBeenCalledWith(
+            "/path/to/src/assets/images/_module@",
+            { basedir: "/path/to", extensions: [".js"] }
+        );
+    });
+
+    test("should throw error when alias type is invalid", () => {
+        resolve.sync = jest.fn(() => "/path/to/resolved.js");
+        fs.existsSync = jest.fn(() => true);
+
+        jest.mock("/path/to/vite.config.js", () => ({
+            default: {
+                resolve: {
+                    extensions: [".js"],
+                    alias: "test",
                 },
             },
         }), { virtual: true });
@@ -33,12 +85,7 @@ describe("Resolver Plugin Tests", () => {
         // JS module
         let result = resolver.resolve("_/module", "/path/to/file.js", { configPath: "/path/to/vite.config.js" });
 
-        expect(result.found).toBe(true);
-        expect(result.path).toBe("/path/to/resolved.js");
-        expect(resolve.sync).toHaveBeenCalledWith(
-            "/path/to/src/module",
-            { basedir: "/path/to", extensions: [".js"] }
-        );
+        expect(result.found).toBe(false);
     });
 
     test("should resolve non-core module with publicDir", () => {

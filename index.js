@@ -52,9 +52,27 @@ exports.resolve = (source, file, config) => {
 
         // parse and replace alias
         if (alias) {
-            Object.entries(alias).forEach(([find, replacement]) => {
-                actualSource = actualSource.replace(find, replacement);
-            });
+            const pathParts = actualSource.split(path.sep);
+            if (Array.isArray(alias)) {
+                for (let i = 0; i < pathParts.length; i++) {
+                    alias.forEach(({find, replacement}) => {
+                        if (pathParts[i] === find) {
+                            pathParts[i] = replacement;
+                        }
+                    });
+                }
+            }
+            else if (typeof alias === "object") {
+                for (let i = 0; i < pathParts.length; i++) {
+                    if (alias.hasOwnProperty(pathParts[i])) {
+                        pathParts[i] = alias[pathParts[i]];
+                    }
+                }
+            }
+            else {
+                throw new Error("The alias must be either an object, or an array of objects.");
+            }
+            actualSource = pathParts.join(path.sep);
         }
 
         // public dir
