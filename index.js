@@ -75,20 +75,27 @@ exports.resolve = (source, file, config) => {
             actualSource = pathParts.join(path.sep);
         }
 
-        // public dir
-        // TODO this can lead to incorrect path error if `actualSource` is absolute path and DNE.
-        if (viteConfig.publicDir !== false) {
-            const publicDir = viteConfig.publicDir ?? "public";
-            if (actualSource.charAt(0) === "/" && !fs.existsSync(actualSource)) {
-                actualSource = path.join(path.resolve(publicDir), actualSource);
+        // resolve module
+        let resolvedPath = "";
+        try {
+            resolvedPath = resolve.sync(actualSource, {
+                basedir: path.dirname(file),
+                extensions,
+            });
+        }
+        catch (err) {
+            if (viteConfig.publicDir !== false) {
+                const publicDir = viteConfig.publicDir ?? "public";
+                const publicActualSource = path.join(path.resolve(publicDir), actualSource);
+                resolvedPath = resolve.sync(publicActualSource, {
+                    basedir: path.dirname(file),
+                    extensions,
+                });
+            }
+            else {
+                throw new Error("source cannot be resolved in actual path nor in 'Public' path.");
             }
         }
-
-        // resolve module
-        const resolvedPath = resolve.sync(actualSource, {
-            basedir: path.dirname(file),
-            extensions,
-        });
 
         log("resolved to:", resolvedPath);
         return { found: true, path: resolvedPath };
