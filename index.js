@@ -1,7 +1,8 @@
 const path = require("path");
 const resolve = require("resolve");
 const debug = require("debug");
-const log = debug("eslint-plugin-import:resolver:vite");
+const namespace = "eslint-plugin-import:resolver:vite";
+const log = debug(namespace);
 
 exports.interfaceVersion = 2;
 
@@ -15,6 +16,11 @@ exports.resolve = (source, file, config) => {
 
     try {
         const { viteConfig } = config;
+
+        if (!viteConfig) {
+            console.debug(`[${namespace}]`, "'viteConfig' option must be a vite config object.");
+        }
+
         const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
         const { alias, extensions = defaultExtensions } = viteConfig.resolve ?? {};
 
