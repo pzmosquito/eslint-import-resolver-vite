@@ -1,50 +1,20 @@
 const path = require("path");
 const resolve = require("resolve");
-const fs = require("fs");
 const debug = require("debug");
-
-const namespace = "eslint-plugin-import:resolver:vite";
-
-const log = debug(namespace);
-
-const logError = (message) => {
-    log(message);
-    console.error(`[${namespace}] ${message}`);
-};
+const log = debug("eslint-plugin-import:resolver:vite");
 
 exports.interfaceVersion = 2;
 
 exports.resolve = (source, file, config) => {
-    log("resolving:", source);
-    log("in file:", file);
+    log("resolving:\t", source);
+    log("in file:\t", file);
 
     if (resolve.isCore(source)) {
         return { found: true, path: null };
     }
 
     try {
-        // combine default config with user defined config
-        const pluginConfig = {
-            configPath: "vite.config.js",
-            ...(config ?? {}),
-        };
-
-        // load vite config
-        const viteConfigPath = path.resolve(pluginConfig.configPath);
-        if (!fs.existsSync(viteConfigPath)) {
-            throw new Error(`Vite config file doesn't exist at '${viteConfigPath}'`)
-        }
-        const viteConfigFile = require(viteConfigPath);
-
-        let viteConfig;
-        if (pluginConfig.namedExport) {
-            viteConfig = viteConfigFile[pluginConfig.namedExport]
-        }
-        else {
-            const viteConfigObj = viteConfigFile.default ?? viteConfigFile
-            viteConfig = typeof viteConfigObj === "function" ? viteConfigObj() : viteConfigObj;
-        }
-
+        const { viteConfig } = config;
         const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
         const { alias, extensions = defaultExtensions } = viteConfig.resolve ?? {};
 
@@ -77,31 +47,30 @@ exports.resolve = (source, file, config) => {
 
         // resolve module
         let resolvedPath = "";
+        const resolveOptions = {
+            basedir: path.dirname(file),
+            extensions,
+        };
+
         try {
-            resolvedPath = resolve.sync(actualSource, {
-                basedir: path.dirname(file),
-                extensions,
-            });
+            resolvedPath = resolve.sync(actualSource, resolveOptions);
         }
         catch (err) {
             if (viteConfig.publicDir !== false) {
                 const publicDir = viteConfig.publicDir ?? "public";
                 const publicActualSource = path.join(path.resolve(publicDir), actualSource);
-                resolvedPath = resolve.sync(publicActualSource, {
-                    basedir: path.dirname(file),
-                    extensions,
-                });
+                resolvedPath = resolve.sync(publicActualSource, resolveOptions);
             }
             else {
                 throw new Error("source cannot be resolved in actual path nor in 'Public' path.");
             }
         }
 
-        log("resolved to:", resolvedPath);
+        log("resolved:\t", resolvedPath);
         return { found: true, path: resolvedPath };
     }
     catch (err) {
-        logError(err.message);
+        log("ERROR:\t", err.message);
         return { found: false };
     }
 };
