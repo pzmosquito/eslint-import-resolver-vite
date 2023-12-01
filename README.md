@@ -1,8 +1,11 @@
 # eslint-import-resolver-vite
 
-Vite module resolution plugin for `eslint-plugin-import`.
+Vite module resolution plugin for `eslint-plugin-import`. This plugin will resolve the `resolve.alias` option.
 
-This plugin will resolve the `resolve.alias` option.
+> #### Version `2.0.0-beta.1` is available. See [what's changed](https://github.com/pzmosquito/eslint-import-resolver-vite/releases/tag/2.0.0-beta.1).
+> ```sh
+> npm install --save-dev eslint-import-resolver-vite@2.0.0-beta.1
+> ```
 
 ### Installation
 ```sh
