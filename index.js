@@ -24,7 +24,7 @@ exports.resolve = (source, file, config) => {
         const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
         const { alias, extensions = defaultExtensions } = viteConfig.resolve ?? {};
 
-        let actualSource = source;
+        let actualSource = path.normalize(source);
 
         // parse and replace alias
         if (alias) {
