@@ -50,7 +50,6 @@ exports.resolve = (source, file, config) => {
 
     const { viteConfig } = config;
     if (!viteConfig) {
-        log("'viteConfig' option must be a vite config object.");
         throw new Error("'viteConfig' option must be a vite config object.");
     }
 
