@@ -16,10 +16,9 @@ npm install --save-dev eslint-import-resolver-vite
 
 
 ### How to use
+
+#### Vite config file
 ```js
-/**
- * vite config file
- */
 export const viteConfigObj = {
     resolve: {
         alias: {
@@ -27,10 +26,13 @@ export const viteConfigObj = {
         }
     },
 };
+```
 
-/**
- * eslint config file
- */
+#### ESLint config file
+NOTE:  
+- Since `eslint-plugin-import` doesn't support an async resolver, Vite's [ResolvedConfig API](https://vitejs.dev/guide/api-javascript.html#resolvedconfig) cannot be utilized.
+- This plugin accepts a Vite config object to accommodate various setups, e.g. CJS, ESM, or mixed.
+```js
 module.exports = {
     settings: {
         "import/resolver": {
