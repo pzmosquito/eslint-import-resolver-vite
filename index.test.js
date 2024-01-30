@@ -14,7 +14,13 @@ describe("Resolver Plugin Tests", () => {
     });
 
     test("should resolve non-core module", () => {
-        resolve.sync = jest.fn(() => "/path/to/resolved.js");
+        resolve.sync = jest.fn((source) => {
+            // console.log("SOURCE: ", source);
+            if (source === "/path/to/src/assets/images/_module@") {
+                return "/path/to/resolved.js";
+            }
+            throw new Error("Resolve error");
+        });
 
         const viteConfig = {
             resolve: {
@@ -38,7 +44,13 @@ describe("Resolver Plugin Tests", () => {
     });
 
     test("should resolve non-core module (array alias pairs)", () => {
-        resolve.sync = jest.fn(() => "/path/to/resolved.js");
+        resolve.sync = jest.fn((source) => {
+            // console.log("SOURCE: ", source);
+            if (source === "/path/to/src/assets/images/_module@") {
+                return "/path/to/resolved.js";
+            }
+            throw new Error("Resolve error");
+        });
 
         const viteConfig = {
             resolve: {
@@ -62,7 +74,10 @@ describe("Resolver Plugin Tests", () => {
     });
 
     test("should throw error when alias type is invalid", () => {
-        resolve.sync = jest.fn(() => "/path/to/resolved.js");
+        resolve.sync = jest.fn((source) => {
+            // console.log("SOURCE: ", source);
+            throw new Error("Resolve error");
+        });
 
         const viteConfig = {
             resolve: {
@@ -72,21 +87,18 @@ describe("Resolver Plugin Tests", () => {
         };
 
         // JS module
-        let result = resolver.resolve("_/module", "/path/to/file.js", { viteConfig });
+        let result = () => resolver.resolve("_/module", "/path/to/file.js", { viteConfig });
 
-        expect(result.found).toBe(false);
+        expect(result).toThrow("The alias must be either an object, or an array of objects.");
     });
 
     test("should resolve non-core module with publicDir", () => {
         resolve.sync = jest.fn((source) => {
-            console.log(source);
-            if (source === "/path/to/src/module") {
-                throw new Error("Resolve error");
-            }
-            else if (source === "/path/to/public/path/to/src/module") {
+            // console.log("SOURCE: ", source);
+            if (source === "/path/to/public/path/to/src/module") {
                 return "/path/to/resolved.js";
             }
-            return "incorrect";
+            throw new Error("Resolve error");
         });
 
         const viteConfig = {
@@ -107,7 +119,13 @@ describe("Resolver Plugin Tests", () => {
     });
 
     test("should resolve non-core module with absolute path", () => {
-        resolve.sync = jest.fn(() => "/path/to/resolved.js");
+        resolve.sync = jest.fn((source) => {
+            // console.log("SOURCE: ", source);
+            if (source === "/path/to/module") {
+                return "/path/to/resolved.js";
+            }
+            throw new Error("Resolve error");
+        });
 
         const viteConfig = {
             resolve: {
@@ -135,7 +153,9 @@ describe("Resolver Plugin Tests", () => {
             throw new Error("Resolve error");
         });
 
-        const result = resolver.resolve("module", "/path/to/file.js", {});
+        const viteConfig = {};
+
+        const result = resolver.resolve("module", "/path/to/file.js", { viteConfig });
 
         expect(result.found).toBe(false);
     });
