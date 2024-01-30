@@ -2,88 +2,45 @@
 
 Vite module resolution plugin for `eslint-plugin-import`. This plugin will resolve the `resolve.alias` option.
 
-> #### Version `2.0.0-beta.3` is available. See [what's changed](https://github.com/pzmosquito/eslint-import-resolver-vite/releases/tag/2.0.0-beta.1).
-> ```sh
-> npm install --save-dev eslint-import-resolver-vite@2.0.0-beta.3
-> ```
 
 ### Installation
 ```sh
 npm install --save-dev eslint-import-resolver-vite
-
-# install vite-plugin-eslint if you don't already have it
-npm install --save-dev vite-plugin-eslint
 ```
 
-### How to use
-```js
-/**
- * vite config file
- */
-import eslintPlugin from "vite-plugin-eslint";
 
-export default {
+### Config Options
+- **viteConfig**: The Vite config object.
+  - Required: Yes
+  - Type: object
+
+
+### How to use
+
+#### Vite config file
+```js
+export const viteConfigObj = {
     resolve: {
         alias: {
             _: path.resolve(__dirname, "src")
         }
     },
-    plugins: [
-        eslintPlugin()
-    ]
 };
+```
 
-/**
- * eslint config file
- */
+#### ESLint config file
+NOTE:  
+- Since `eslint-plugin-import` doesn't support an async resolver, Vite's [ResolvedConfig API](https://vitejs.dev/guide/api-javascript.html#resolvedconfig) cannot be utilized.
+- This plugin accepts a Vite config object to accommodate various setups, e.g. CJS, ESM, or mixed.
+```js
 module.exports = {
     settings: {
-        // This uses the default `vite.config.js` file and the Vite configuration is an object. 
-        "import/resolver": "vite",
-        
-        // OR use custom config (see Config Options below):
         "import/resolver": {
             vite: {
-                configPath: "./app1/vite.confg.ts"
+                viteConfig: require("./vite.config").viteConfigObj,
             }
         }
     }
 }
 
 ```
-
-### Config Options
-- **configPath**: vite config file path.
-  - Required: No
-  - Type: string
-  - Default: "vite.config.js"
-  - By default, the plugin assumes the vite config file and eslintrc file are in the same directory.
-- **namedExport**: named export of vite config object.
-  - Required: No
-  - Type: string
-  - Default: [No Default]
-  - **If you use a function as vite config, you must export a named vite config object. This is a result of the limitation of `eslint-plugin-import`.**
-  ```js
-  /**
-   * vite config file
-   */
-  export const viteConfig = {};
-  
-  export default ({ command, mode }) => {
-      // conditional config
-      return viteConfig;
-  }
-
-  /**
-   * eslintrc file
-   */
-  module.exports = {
-      settings: {
-          "import/resolver": {
-              vite: {
-                  namedExport: "viteConfig"
-              }
-          }
-      }
-  }
-  ```

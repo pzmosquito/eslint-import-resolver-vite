@@ -1,0 +1,7 @@
+.editorconfig
+.gitignore
+index.js
+index.test.js
+jest.config.js
+Makefile
+vite.config.js

@@ -1,107 +1,97 @@
 const path = require("path");
 const resolve = require("resolve");
-const fs = require("fs");
 const debug = require("debug");
-
 const namespace = "eslint-plugin-import:resolver:vite";
-
 const log = debug(namespace);
 
-const logError = (message) => {
-    log(message);
-    console.error(`[${namespace}] ${message}`);
+const processAlias = (alias, source) => {
+    if (alias) {
+        const pathParts = path.normalize(source).split(path.sep);
+        if (Array.isArray(alias)) {
+            for (let i = 0; i < pathParts.length; i++) {
+                alias.forEach(({find, replacement}) => {
+                    if (pathParts[i] === find) {
+                        pathParts[i] = replacement;
+                    }
+                });
+            }
+        }
+        else if (typeof alias === "object") {
+            for (let i = 0; i < pathParts.length; i++) {
+                if (alias.hasOwnProperty(pathParts[i])) {
+                    pathParts[i] = alias[pathParts[i]];
+                }
+            }
+        }
+        else {
+            throw new Error("The alias must be either an object, or an array of objects.");
+        }
+        return pathParts.join(path.sep);
+    }
+    return source;
+};
+
+const resolveSync = (source, resolveOptions, label) => {
+    log("resolving:\t", `(${label})`, source);
+    const resolvedPath = resolve.sync(source, resolveOptions);
+    log("resolved:\t", resolvedPath);
+    return { found: true, path: resolvedPath };
 };
 
 exports.interfaceVersion = 2;
 
 exports.resolve = (source, file, config) => {
-    log("resolving:", source);
-    log("in file:", file);
+    log("\nin file:\t", file);
 
     if (resolve.isCore(source)) {
+        log("resolved:\t", source);
         return { found: true, path: null };
     }
 
+    const { viteConfig } = config;
+    if (!viteConfig) {
+        throw new Error("'viteConfig' option must be a vite config object.");
+    }
+
+    const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
+    const { alias, extensions = defaultExtensions } = viteConfig.resolve ?? {};
+    const resolveOptions = { basedir: path.dirname(file), extensions };
+
+    // try to resolve the source as is
     try {
-        // combine default config with user defined config
-        const pluginConfig = {
-            configPath: "vite.config.js",
-            ...(config ?? {}),
-        };
+        return resolveSync(source, resolveOptions, "as is");
+    }
+    catch {}
 
-        // load vite config
-        const viteConfigPath = path.resolve(pluginConfig.configPath);
-        if (!fs.existsSync(viteConfigPath)) {
-            throw new Error(`Vite config file doesn't exist at '${viteConfigPath}'`)
-        }
-        const viteConfigFile = require(viteConfigPath);
-
-        let viteConfig;
-        if (pluginConfig.namedExport) {
-            viteConfig = viteConfigFile[pluginConfig.namedExport]
-        }
-        else {
-            const viteConfigObj = viteConfigFile.default ?? viteConfigFile
-            viteConfig = typeof viteConfigObj === "function" ? viteConfigObj() : viteConfigObj;
-        }
-
-        const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
-        const { alias, extensions = defaultExtensions } = viteConfig.resolve ?? {};
-
-        let actualSource = path.normalize(source);
-
-        // parse and replace alias
-        if (alias) {
-            const pathParts = actualSource.split(path.sep);
-            if (Array.isArray(alias)) {
-                for (let i = 0; i < pathParts.length; i++) {
-                    alias.forEach(({find, replacement}) => {
-                        if (pathParts[i] === find) {
-                            pathParts[i] = replacement;
-                        }
-                    });
-                }
-            }
-            else if (typeof alias === "object") {
-                for (let i = 0; i < pathParts.length; i++) {
-                    if (alias.hasOwnProperty(pathParts[i])) {
-                        pathParts[i] = alias[pathParts[i]];
-                    }
-                }
-            }
-            else {
-                throw new Error("The alias must be either an object, or an array of objects.");
-            }
-            actualSource = pathParts.join(path.sep);
-        }
-
-        // resolve module
-        let resolvedPath = "";
+    // try to resolve the source with alias
+    const parsedSource = processAlias(alias, source);
+    if (parsedSource !== source) {
         try {
-            resolvedPath = resolve.sync(actualSource, {
-                basedir: path.dirname(file),
-                extensions,
-            });
+            return resolveSync(parsedSource, resolveOptions, "with alias");
         }
-        catch (err) {
-            if (viteConfig.publicDir !== false) {
-                const publicDir = viteConfig.publicDir ?? "public";
-                const publicActualSource = path.join(path.resolve(publicDir), actualSource);
-                resolvedPath = resolve.sync(publicActualSource, {
-                    basedir: path.dirname(file),
-                    extensions,
-                });
-            }
-            else {
-                throw new Error("source cannot be resolved in actual path nor in 'Public' path.");
-            }
-        }
+        catch {}
+    }
 
-        log("resolved to:", resolvedPath);
-        return { found: true, path: resolvedPath };
+    // try to resolve the source if it is an absolute path
+    if (path.isAbsolute(parsedSource)) {
+        const root = viteConfig.root ?? process.cwd();
+        const absoluteSource = path.join(path.resolve(root), parsedSource);
+        try {
+            return resolveSync(absoluteSource, resolveOptions, "absolute path");
+        }
+        catch {}
     }
-    catch (err) {
-        logError(err.message);
-        return { found: false };
+
+    // try to resolve the source in public directory if all above failed
+    if (viteConfig.publicDir !== false) {
+        const publicDir = viteConfig.publicDir ?? "public";
+        const publicSource = path.join(path.resolve(publicDir), parsedSource);
+        try {
+            return resolveSync(publicSource, resolveOptions, "in public directory");
+        }
+        catch {}
     }
+
+    log("ERROR:\t", "Unable to resolve");
+    return { found: false };
 };
