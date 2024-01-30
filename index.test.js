@@ -73,6 +73,15 @@ describe("Resolver Plugin Tests", () => {
         );
     });
 
+    test("should throw error when viteConfig is not an object", () => {
+        const viteConfig = null;
+
+        // JS module
+        let result = () => resolver.resolve("_/module", "/path/to/file.js", { viteConfig });
+
+        expect(result).toThrow("'viteConfig' option must be a vite config object.");
+    });
+
     test("should throw error when alias type is invalid", () => {
         resolve.sync = jest.fn((source) => {
             // console.log("SOURCE: ", source);
