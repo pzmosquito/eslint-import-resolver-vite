@@ -9,12 +9,6 @@ npm install --save-dev eslint-import-resolver-vite
 ```
 
 
-### Config Options
-- **viteConfig**: The Vite config object.
-  - Required: Yes
-  - Type: object
-
-
 ### How to use
 
 #### Vite config file
@@ -37,7 +31,7 @@ module.exports = {
     settings: {
         "import/resolver": {
             vite: {
-                viteConfig: require("./vite.config").viteConfigObj,
+                viteConfig: require("./vite.config").viteConfigObj, // named export of the Vite config object.
             }
         }
     }
