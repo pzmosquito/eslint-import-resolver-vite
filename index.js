@@ -95,3 +95,16 @@ exports.resolve = (source, file, config) => {
     log("ERROR:\t", "Unable to resolve");
     return { found: false };
 };
+
+exports.createViteImportResolver = (config) => {
+    const { viteConfig } = config;
+    if (!viteConfig) {
+        throw new Error("'viteConfig' option must be a vite config object.");
+    }
+
+    return {
+        interfaceVersion: 3,
+        name: 'eslint-import-resolver-vite',
+        resolve: (source, file) => exports.resolve(source, file, config)
+    }
+}
