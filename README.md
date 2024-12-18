@@ -1,6 +1,6 @@
 # eslint-import-resolver-vite
 
-Vite module resolution plugin for `eslint-plugin-import`. This plugin will resolve the `resolve.alias` option.
+Vite module resolution plugin for `eslint-plugin-import` and `eslint-plugin-import-x`. This plugin will resolve the `resolve.alias` option.
 
 
 ### Installation
@@ -24,9 +24,11 @@ export const viteConfigObj = {
 
 #### ESLint config file
 NOTE:  
-- Since `eslint-plugin-import` doesn't support an async resolver, Vite's [ResolvedConfig API](https://vitejs.dev/guide/api-javascript.html#resolvedconfig) cannot be utilized.
+- Since ESLint requires rules to be synchronous, Vite's [ResolvedConfig API](https://vitejs.dev/guide/api-javascript.html#resolvedconfig) cannot be utilized.
 - This plugin accepts a Vite config object to accommodate various setups, e.g. CJS, ESM, or mixed.
+
 ```js
+// for using `eslint-plugin-import`
 module.exports = {
     settings: {
         "import/resolver": {
@@ -37,4 +39,17 @@ module.exports = {
     }
 }
 
+
+// for using `eslint-plugin-import-x` resolver interface v3
+const { createViteImportResolver } = require("eslint-import-resolver-vite");
+
+module.exports = {
+    settings: {
+        "import-x/resolver-next": [
+            createViteImportResolver({
+                viteConfig: require("./vite.config").viteConfigObj, // named export of the Vite config object.
+            })
+        ]
+    }
+}
 ```
