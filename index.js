@@ -41,16 +41,16 @@ const resolveSync = (source, resolveOptions, label) => {
 exports.interfaceVersion = 2;
 
 exports.resolve = (source, file, config) => {
+    const { viteConfig } = config;
+    if (!viteConfig) {
+        throw new Error("'viteConfig' option must be a vite config object.");
+    }
+
     log("\nin file:\t", file);
 
     if (resolve.isCore(source)) {
         log("resolved:\t", source);
         return { found: true, path: null };
-    }
-
-    const { viteConfig } = config;
-    if (!viteConfig) {
-        throw new Error("'viteConfig' option must be a vite config object.");
     }
 
     const defaultExtensions = [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"];
@@ -96,15 +96,11 @@ exports.resolve = (source, file, config) => {
     return { found: false };
 };
 
+// for `eslint-plugin-import-x` resolver interface v3
 exports.createViteImportResolver = (config) => {
-    const { viteConfig } = config;
-    if (!viteConfig) {
-        throw new Error("'viteConfig' option must be a vite config object.");
-    }
-
     return {
         interfaceVersion: 3,
-        name: 'eslint-import-resolver-vite',
+        name: "eslint-import-resolver-vite",
         resolve: (source, file) => exports.resolve(source, file, config)
-    }
+    };
 }
