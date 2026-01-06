@@ -5,30 +5,80 @@ const namespace = "eslint-plugin-import:resolver:vite";
 const log = debug(namespace);
 
 const processAlias = (alias, source) => {
-    if (alias) {
-        const pathParts = path.normalize(source).split(path.sep);
-        if (Array.isArray(alias)) {
-            for (let i = 0; i < pathParts.length; i++) {
-                alias.forEach(({find, replacement}) => {
-                    if (pathParts[i] === find) {
-                        pathParts[i] = replacement;
-                    }
-                });
-            }
-        }
-        else if (typeof alias === "object") {
-            for (let i = 0; i < pathParts.length; i++) {
-                if (alias.hasOwnProperty(pathParts[i])) {
-                    pathParts[i] = alias[pathParts[i]];
+    if (!alias) {
+        return source;
+    }
+
+    if (typeof alias !== "object" || alias === null) {
+        throw new Error("The alias must be either an object, or an array of objects.");
+    }
+
+    const aliases = Array.isArray(alias)
+        ? alias
+        : Object.keys(alias).map((key) => ({ find: key, replacement: alias[key] }));
+
+    // Sort string-based aliases by length descending to match most specific first
+    const sortedAliases = aliases.slice().sort((a, b) => {
+        const lenA = typeof a.find === "string" ? a.find.length : 0;
+        const lenB = typeof b.find === "string" ? b.find.length : 0;
+        return lenB - lenA;
+    });
+
+    let result = source;
+    let parts = result.split("/");
+    let i = 0;
+
+    while (i < parts.length) {
+        let matched = false;
+        for (const { find, replacement } of sortedAliases) {
+            if (typeof find === "string") {
+                const findParts = find.split("/");
+                if (matchSegments(parts, i, findParts)) {
+                    const replacementParts = replacement.split("/");
+                    parts.splice(i, findParts.length, ...replacementParts);
+                    i += replacementParts.length;
+                    matched = true;
+                    break;
                 }
             }
         }
-        else {
-            throw new Error("The alias must be either an object, or an array of objects.");
+        if (!matched) {
+            i++;
         }
-        return pathParts.join(path.sep);
     }
-    return source;
+
+    result = parts.join("/");
+
+    // Apply regex aliases
+    for (const { find, replacement } of aliases) {
+        if (find instanceof RegExp) {
+            result = result.replace(find, replacement);
+        }
+    }
+
+    return result;
+};
+
+const matchSegments = (parts, start, findParts) => {
+    if (findParts.length === 0 || start + findParts.length > parts.length) {
+        return false;
+    }
+
+    for (let j = 0; j < findParts.length; j++) {
+        const find = findParts[j];
+        const part = parts[start + j];
+
+        if (j === findParts.length - 1 && find.endsWith("$")) {
+            const exactFind = find.slice(0, -1);
+            if (part !== exactFind || start + findParts.length < parts.length) {
+                return false;
+            }
+        } else if (part !== find) {
+            return false;
+        }
+    }
+
+    return true;
 };
 
 const resolveSync = (source, resolveOptions, label) => {
@@ -61,7 +111,7 @@ exports.resolve = (source, file, config) => {
     try {
         return resolveSync(source, resolveOptions, "as is");
     }
-    catch {}
+    catch { }
 
     // try to resolve the source with alias
     const parsedSource = processAlias(alias, source);
@@ -69,7 +119,7 @@ exports.resolve = (source, file, config) => {
         try {
             return resolveSync(parsedSource, resolveOptions, "with alias");
         }
-        catch {}
+        catch { }
     }
 
     // try to resolve the source if it is an absolute path
@@ -79,7 +129,7 @@ exports.resolve = (source, file, config) => {
         try {
             return resolveSync(absoluteSource, resolveOptions, "absolute path");
         }
-        catch {}
+        catch { }
     }
 
     // try to resolve the source in public directory if all above failed
@@ -89,7 +139,7 @@ exports.resolve = (source, file, config) => {
         try {
             return resolveSync(publicSource, resolveOptions, "in public directory");
         }
-        catch {}
+        catch { }
     }
 
     log("ERROR:\t", "Unable to resolve");
@@ -104,3 +154,5 @@ exports.createViteImportResolver = (config) => {
         resolve: (source, file) => exports.resolve(source, file, config)
     };
 }
+
+exports.interfaceVersion = 2;

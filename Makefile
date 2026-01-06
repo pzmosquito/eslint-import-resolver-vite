@@ -2,7 +2,7 @@ container := eslint-import-resolver-vite
 
 .PHONY: dev
 dev:
-	docker run -t -i -v `pwd`:/usr/app -w /usr/app --rm --name $(container) node:18-alpine
+	docker run -t -i -v `pwd`:/usr/app -w /usr/app --rm --name $(container) node:24-alpine
 
 .PHONY: shell
 shell:
