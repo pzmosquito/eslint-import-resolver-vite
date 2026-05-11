@@ -53,3 +53,24 @@ module.exports = {
     }
 }
 ```
+
+#### Subpath resolution
+
+In addition to standard segment-based alias resolution, you can define aliases for complete module paths including subpaths. The resolver checks for exact full path matches first before falling back to segment-based replacements.
+
+```js
+export const viteConfigObj = {
+    resolve: {
+        alias: {
+            "@utils": path.resolve(__dirname, "src/utils"),
+            "@utils/api/client": path.resolve(__dirname, "src/api/client"), // Full path alias
+        },
+    },
+};
+
+// In your code:
+import { apiClient } from "@utils/api/client"; // ✓ resolves to src/api/client
+import { helper } from "@utils/helpers"; // ✓ resolves to src/utils/helpers
+```
+
+This works with both object-based and array-based alias configurations.
