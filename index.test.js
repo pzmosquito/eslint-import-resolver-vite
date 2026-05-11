@@ -73,6 +73,87 @@ describe("Resolver Plugin Tests", () => {
         );
     });
 
+    test("should resolve non-core subpath module (array alias pairs)", () => {
+        resolve.sync = jest.fn((source) => {
+            // console.log("SOURCE: ", source);
+            if (source === "/path/to/module/subpath.js") {
+                return "/path/to/module/subpath.js";
+            }
+            throw new Error("Resolve error");
+        });
+
+        const viteConfig = {
+            resolve: {
+                extensions: [".js"],
+                alias: [
+                    {
+                        find: "module/subpath",
+                        replacement: "/path/to/module/subpath.js",
+                    },
+                ],
+            },
+        };
+
+        // JS module
+        let result = resolver.resolve("module/subpath", "/path/to/file.js", {
+            viteConfig,
+        });
+
+        expect(result.found).toBe(true);
+        expect(result.path).toBe("/path/to/module/subpath.js");
+        expect(resolve.sync).toHaveBeenCalledWith("module/subpath", {
+            basedir: "/path/to",
+            extensions: [".js"],
+        });
+        expect(resolve.sync).toHaveBeenNthCalledWith(
+            2,
+            "/path/to/module/subpath.js",
+            {
+                basedir: "/path/to",
+                extensions: [".js"],
+            },
+        );
+    });
+
+    test("should resolve non-core subpath module (object pairs)", () => {
+        resolve.sync = jest.fn((source) => {
+            // console.log("SOURCE: ", source);
+            if (source === "/path/to/module/subpath.js") {
+                return "/path/to/module/subpath.js";
+            }
+            throw new Error("Resolve error");
+        });
+
+        const viteConfig = {
+            resolve: {
+                extensions: [".js"],
+                alias: {
+                    "module/subpath": "/path/to/module/subpath.js",
+                },
+            },
+        };
+
+        // JS module
+        let result = resolver.resolve("module/subpath", "/path/to/file.js", {
+            viteConfig,
+        });
+
+        expect(result.found).toBe(true);
+        expect(result.path).toBe("/path/to/module/subpath.js");
+        expect(resolve.sync).toHaveBeenCalledWith("module/subpath", {
+            basedir: "/path/to",
+            extensions: [".js"],
+        });
+        expect(resolve.sync).toHaveBeenNthCalledWith(
+            2,
+            "/path/to/module/subpath.js",
+            {
+                basedir: "/path/to",
+                extensions: [".js"],
+            },
+        );
+    });
+
     test("should throw error when viteConfig is not an object", () => {
         const viteConfig = null;
 
