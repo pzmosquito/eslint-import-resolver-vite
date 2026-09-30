@@ -59,6 +59,10 @@ module.exports = {
 
 This package is built and tested against the **last 3 Vite major versions** (currently **6**, **7**, and **8**). Vite is a build-time/dev dependency only — the resolver does not import Vite at runtime.
 
+**Node for consumers:** `engines.node` stays `>=16` because the published resolver does not require Vite at runtime.
+
+**Node for contributors / `npm run build` / `prepublishOnly`:** use **Node `^20.19.0 || >=22.12.0`** so Vite 7 and 8 install and build cleanly (Vite 6 still supports Node 18, but the default `make dev` image is Node 20). The Makefile uses `node:20-alpine`.
+
 ```sh
 npm run test:ci      # unit tests (mock-based; Vite version-agnostic)
 npm run build        # library build with the installed Vite
