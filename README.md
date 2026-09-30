@@ -54,6 +54,19 @@ module.exports = {
 }
 ```
 
+
+### Vite compatibility
+
+This package is built and tested against the **last 3 Vite major versions** (currently **6**, **7**, and **8**). Vite is a build-time/dev dependency only — the resolver does not import Vite at runtime.
+
+```sh
+npm run test:ci      # unit tests (mock-based; Vite version-agnostic)
+npm run build        # library build with the installed Vite
+npm run test:matrix  # install+test+build against Vite 6.4.3, 7.3.6, and 8.3.1
+```
+
+Prefer `npm run test:matrix` locally (or wire the same Vite versions into CI when the token has `workflow` scope).
+
 #### Subpath resolution
 
 In addition to standard segment-based alias resolution, you can define aliases for complete module paths including subpaths. The resolver checks for exact full path matches first before falling back to segment-based replacements.

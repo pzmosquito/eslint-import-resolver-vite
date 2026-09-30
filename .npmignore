@@ -4,6 +4,7 @@ index.js
 index.test.js
 jest.config.js
 Makefile
-vite.config.js
 vite.config.mjs
+scripts/
+.github/
 node_modules/

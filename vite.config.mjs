@@ -17,7 +17,7 @@ export default defineConfig({
         },
         // Vite 8 (Rolldown) treats lib builds as browser by default and stubs
         // Node builtins unless they are explicitly externalized. Keep rollupOptions
-        // for Vite 5–7 compatibility during the transition.
+        // for Vite 6–7 compatibility (Rolldown ignores unknown rollupOptions; Rollup ignores rolldownOptions).
         rolldownOptions: {
             external: [...nodeBuiltins, "resolve", "debug"],
         },
