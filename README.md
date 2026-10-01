@@ -54,6 +54,26 @@ module.exports = {
 }
 ```
 
+
+### Vite compatibility
+
+This package is built and tested against the **last 3 Vite major versions** (currently **6**, **7**, and **8**). Vite is a build-time/dev dependency only — the resolver does not import Vite at runtime.
+
+**Node for consumers:** `engines.node` stays `>=16` because the published resolver does not require Vite at runtime.
+
+**Node for contributors / `npm run build` / `prepublishOnly`:** use **Node `^20.19.0 || >=22.12.0`** so Vite 7 and 8 install and build cleanly (Vite 6 still supports Node 18, but the default `make dev` image is Node 20). The Makefile uses `node:20-alpine`.
+
+```sh
+npm run test:ci      # unit tests (mock-based; Vite version-agnostic)
+npm run test:e2e     # ESLint on e2e/ (aliases, extensions, publicDir); no browser
+npm run build        # library build with the installed Vite
+npm run test:matrix  # install+test+build against Vite 6.4.3, 7.3.6, and 8.3.2
+```
+
+`test:e2e` builds `dist/` and lints `e2e/src` with `eslint-plugin-import` and `eslint-plugin-import-x` (`createViteImportResolver`). Expected imports must resolve; `e2e/src/broken.js` must report `no-unresolved`.
+
+Prefer `npm run test:matrix` locally (or wire the same Vite versions into CI when the token has `workflow` scope).
+
 #### Subpath resolution
 
 In addition to standard segment-based alias resolution, you can define aliases for complete module paths including subpaths. The resolver checks for exact full path matches first before falling back to segment-based replacements.
