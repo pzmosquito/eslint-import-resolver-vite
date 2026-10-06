@@ -67,7 +67,7 @@ This package is built and tested against the **last 3 Vite major versions** (cur
 npm run test:ci      # unit tests (mock-based; Vite version-agnostic)
 npm run test:e2e     # ESLint on e2e/ (aliases, extensions, publicDir); no browser
 npm run build        # library build with the installed Vite
-npm run test:matrix  # install+test+build against Vite 6.4.3, 7.3.6, and 8.3.2
+npm run test:matrix  # install+test+build against Vite 6.4.4, 7.3.7, and 8.3.3
 ```
 
 `test:e2e` builds `dist/` and lints `e2e/src` with `eslint-plugin-import` and `eslint-plugin-import-x` (`createViteImportResolver`). Expected imports must resolve; `e2e/src/broken.js` must report `no-unresolved`.

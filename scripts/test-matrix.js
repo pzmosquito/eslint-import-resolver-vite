@@ -11,7 +11,7 @@ const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
 /** Latest patches confirmed on npm for the last 3 majors. */
-const VITE_VERSIONS = ["6.4.3", "7.3.6", "8.3.2"];
+const VITE_VERSIONS = ["6.4.4", "7.3.7", "8.3.3"];
 
 function run(cmd, args, opts = {}) {
     console.log(`\n> ${cmd} ${args.join(" ")}`);
